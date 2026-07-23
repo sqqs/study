@@ -1,0 +1,45 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+build.log
+install.log
+tsc.log
+
+# local env files (may contain user API keys)
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# downloaded package tarballs
+*.tgz
+
+# extracted temp package (from failed npm repair)
+_next_extract/
+
+# env / API keys（浏览器 localStorage 里的 Key 不落盘，这里兜底防止任何 .env 被提交）
+.env
+.env.*
+.env*.local
+
+# next generated declaration
+next-env.d.ts

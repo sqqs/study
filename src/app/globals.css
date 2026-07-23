@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-[#F5F5F7] text-ink font-sans antialiased;
+  background-image:
+    radial-gradient(1200px 600px at 8% -10%, rgba(94, 92, 230, 0.12), transparent 60%),
+    radial-gradient(1000px 520px at 100% 0%, rgba(0, 113, 227, 0.10), transparent 55%);
+  background-attachment: fixed;
+}
+
+.glass {
+  @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-glass;
+}
+
+.glass-strong {
+  @apply bg-white/75 backdrop-blur-2xl border border-white/50 shadow-glass-lg;
+}
+
+/* Thin, Apple-like scrollbars */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
