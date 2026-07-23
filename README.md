@@ -27,7 +27,7 @@
 仓库已内置 `.github/workflows/deploy.yml`，push 即部署：
 
 1. 在 GitHub 仓库 **Settings → Pages → Build and deployment → Source 选 "GitHub Actions"**。
-2. 把代码 push 到 `master` 分支（本项目就在 `study` 仓库的 `learn-mentor-web/` 子目录）。
+2. 把代码 push 到 `master` 分支（本仓库根目录即本项目，无需子目录配置）。
 3. 等待 Actions 跑完，访问 `https://sqqs.github.io/study/` 即可使用。
 
 > 构建时自动设置 `basePath=/study` 与 `.nojekyll`，无需任何环境变量（API Key 在你浏览器本地填）。

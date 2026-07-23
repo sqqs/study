@@ -25,7 +25,6 @@ jobs:
           node-version: 20
 
       - name: Install & Build (static export)
-        working-directory: learn-mentor-web
         env:
           GITHUB_PAGES: "true"
         run: |
@@ -33,11 +32,11 @@ jobs:
           npm run build
 
       - name: Add .nojekyll
-        run: touch learn-mentor-web/out/.nojekyll
+        run: touch out/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: learn-mentor-web/out
+          path: out
 
   deploy:
     needs: build
