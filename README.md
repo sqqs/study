@@ -7,8 +7,8 @@
 ## 特性
 
 - 🤖 **智能导师交互**：流式对话，大模型按「审题→建模→推演→验证→复盘→沉淀」门禁流程引导。
-- 🔑 **API Key 自填、无需登录**：Key 只存在你自己浏览器，仅本次请求发给后端代理，部署端零密钥。
-- 🔄 **模型可切换**：DeepSeek（默认）/ OpenAI / Claude / 通义千问 / 自定义，一键切换。
+- 🔑 **API Key 自填、无需登录**：Key 只存在你自己浏览器，浏览器直连大模型，部署端零密钥、零服务端。
+- 🔄 **模型可切换**：DeepSeek（默认）/ OpenAI / Claude / 通义千问 / 自定义，一键切换。纯静态模式下 DeepSeek / OpenAI / 通义可浏览器直连；Claude 受 CORS 限制需自备代理。
 - 💾 **学习飞轮本地存储**：每个访问用户的模式都存在自己浏览器（localStorage）。
 - 🧠 **自动识别同类题**：每次对话自动把你的飞轮注入上下文（替代 `/learn:advise`）。
 - ⚡ **自动沉淀经验**：导师在对话中调用 `savePattern` 工具，把经验写入本地飞轮（替代 `/learn:retro`）。
@@ -16,45 +16,41 @@
 - 🎚️ **Profile 自适应**：小学 / 初中 / 高中 / 大学 / 自学 / 竞赛，改变「怎么教」。
 - 🖼️ **题目图片识别**：聊天区可直接上传或粘贴题目截图，导师读取图片后引导。
 
-## 🌐 网页入口：部署后直接打开网址使用（无需命令行）
+## 🌐 网页入口：打开网址即用（无需命令行、无需服务器）
 
-本项目是 Next.js 全栈应用（含一个轻量服务端代理 `/api/chat`）。只需从 GitHub 仓库一键部署到 **Vercel / Netlify**，即可获得一个网址，浏览器打开就能用——全程不用敲命令。
+本项目已改为 **纯静态站点**：大模型在**浏览器内直接调用**，没有任何服务端代码。因此可以托管到任意静态空间，最方便的是 **GitHub Pages**——你只要 push 到 `master` 分支，Actions 自动构建并发布，约 1 分钟后得到一个 `https://sqqs.github.io/study/` 网址，浏览器打开就能用，全程不用敲命令。所有密钥与对话只存在你自己的浏览器。
 
-> ⚠️ 项目在仓库的 **`learn-mentor-web/` 子目录**，部署时 **Root/Base Directory 务必选 `learn-mentor-web`**。
+> ✅ 实测：DeepSeek、OpenAI 的 API 均返回 `Access-Control-Allow-Origin`，**浏览器可直连**；因此默认模型 DeepSeek（及 OpenAI / 通义等 OpenAI 兼容服务）在纯静态下开箱即用。Anthropic Claude 通常屏蔽浏览器 CORS，纯静态模式选它会失败，建议用 DeepSeek / OpenAI。
 
-### 方式一：Vercel 一键部署（推荐，对 Next.js 最友好）
+### 方式一：GitHub Pages（推荐，零命令行）
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sqqs/study&root-directory=learn-mentor-web)
+仓库已内置 `.github/workflows/deploy.yml`，push 即部署：
 
-或在 Vercel 网页手动操作：
-1. 登录 vercel.com → New Project → Import Git Repository → 选 `sqqs/study`。
-2. **Root Directory 选 `learn-mentor-web`**。
-3. Framework 自动识别为 Next.js，**无需填任何环境变量**（API Key 在你浏览器本地）。
-4. Deploy，约 1 分钟后得到 `https://xxx.vercel.app`，打开即用。
+1. 在 GitHub 仓库 **Settings → Pages → Build and deployment → Source 选 "GitHub Actions"**。
+2. 把代码 push 到 `master` 分支（本项目就在 `study` 仓库的 `learn-mentor-web/` 子目录）。
+3. 等待 Actions 跑完，访问 `https://sqqs.github.io/study/` 即可使用。
 
-### 方式二：Netlify
+> 构建时自动设置 `basePath=/study` 与 `.nojekyll`，无需任何环境变量（API Key 在你浏览器本地填）。
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/sqqs/study)
+### 方式二：Vercel / Netlify（同样可行）
 
-网页操作：导入仓库 → Build command 填 `npm run build` → Publish directory 填 `.next` → **Base directory 填 `learn-mentor-web`** → Deploy。
+静态导出产物在 `learn-mentor-web/out/`，可直接拖到 Vercel/Netlify，或连接仓库部署（Root/Base Directory 选 `learn-mentor-web`）。
 
 ### 使用
 
-打开部署好的网址 → 右上角「设置」填你的大模型 API Key（DeepSeek / OpenAI / Claude 等，图片题需选支持视觉的模型）→ 开始对话。所有数据与密钥只存你浏览器，不落服务器。
+打开网址 → 右上角「设置」填你的大模型 API Key（图片题需选支持视觉的模型，如 DeepSeek-VL / gpt-4o）→ 开始对话。
 
-> 注：因保留服务端代理，需部署到支持 Serverless 函数的平台（Vercel / Netlify 均可），不能直接用纯静态托管（如 GitHub Pages）。若希望做成「纯静态、浏览器直连大模型」版本（可放 GitHub Pages），需要时可告诉我重构。
-
-## 快速开始（本地开发）
+## 本地预览（开发）
 
 ```bash
 cd learn-mentor-web
 npm install
-npm run dev
+npm run dev        # 本地开发服务器 http://localhost:3000
+# 或构建静态产物到 out/ 后本地用任意静态服务器打开
+npm run build && npx serve out
 ```
 
-打开 http://localhost:3000 ，点击右上角「设置」填写你的大模型 API Key（例如 DeepSeek 的 `sk-...`），即可开始对话。
-
-> 说明：后端 `/api/chat` 仅做「安全转发」，不在服务端保存任何密钥。若公网部署，他人可借用你的代理接口，建议在本地或可信网络运行。
+> 说明：本项目**纯静态、浏览器直连大模型**，没有任何服务端。所有密钥与对话只存在于你浏览器，可安全公开托管。
 
 ## 使用流程
 
@@ -71,7 +67,7 @@ src/
   app/
     page.tsx              导师对话主页
     registry/page.tsx     学习飞轮管理页
-    api/chat/route.ts     LLM 代理（读用户密钥，流式返回）
+    (无服务端)            浏览器内 streamText 直连大模型，无需后端
   components/             聊天、侧边栏、Profile、设置弹窗、飞轮列表/编辑/导入导出
   lib/
     types.ts             Pattern / LLMSettings 类型

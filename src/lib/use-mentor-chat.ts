@@ -1,35 +1,40 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { executeSavePattern } from "./tools";
+import { streamText, convertToCoreMessages } from "ai";
+import { getModel } from "./ai";
+import { buildSystemPrompt } from "./prompt";
+import { savePatternTool } from "./tools";
 import { useSettings } from "./settings-store";
 import { useRegistry } from "./registry-store";
 
-// 封装 useChat：附带用户 LLM 设置、飞轮摘要与 Profile；用 onToolCall 在浏览器端执行 savePattern。
-export function useMentorChat() {
-  const profile = useSettings((s) => s.profile);
-  const llm = useSettings((s) => s.llm);
-  const patterns = useRegistry((s) => s.patterns);
+// 纯客户端 fetch：浏览器内直接调用大模型（无服务端代理）。
+// 通过 useChat 的 fetch 选项拦截请求，改用 streamText 直连用户配置的模型，
+// 并返回数据流响应（useChat 原生消费）。Key 始终只存在于用户浏览器。
+async function clientChatFetch(_url: string, init: RequestInit) {
+  const body = JSON.parse(init.body as string) as { messages: any[] };
+  const { llm, profile } = useSettings.getState();
+  const patterns = useRegistry.getState().patterns;
 
+  const result = streamText({
+    model: getModel(llm),
+    system: buildSystemPrompt({ registry: patterns, profile }),
+    messages: convertToCoreMessages(body.messages),
+    tools: { savePattern: savePatternTool },
+    maxSteps: 6,
+    abortSignal: init.signal,
+  });
+
+  return result.toDataStreamResponse({
+    getErrorMessage: (error) =>
+      error instanceof Error ? error.message : "请求出错，请检查 API Key 与模型是否支持。",
+  });
+}
+
+// 封装 useChat：所有对话在浏览器内完成，导师提示词与飞轮上下文在此注入。
+export function useMentorChat() {
   return useChat({
-    api: "/api/chat",
-    maxSteps: 3,
-    onToolCall: async ({ toolCall }) => {
-      if (toolCall.toolName === "savePattern") {
-        return executeSavePattern(toolCall.args);
-      }
-    },
-    experimental_prepareRequestBody: ({ messages }) => ({
-      messages,
-      llmSettings: llm,
-      registry: patterns.map((p) => ({
-        id: p.id,
-        category: p.category,
-        title: p.title,
-        problemType: p.problemType,
-        tags: p.tags,
-      })),
-      profile,
-    }),
+    api: "/api/chat", // 占位路径；实际由 clientChatFetch 在浏览器内直连大模型
+    fetch: clientChatFetch,
   });
 }
