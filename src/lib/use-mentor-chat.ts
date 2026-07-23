@@ -46,13 +46,17 @@ function isVisionModel(model: string): boolean {
     "doubao-vision",
     "glm-4v",
     "deepseek-vl",
+    "deepseek-v4",
     "yi-vl",
     "moondream",
     "llava",
   ];
   if (visionHints.some((h) => m.includes(h))) return true;
   // 明确纯文本、不支持视觉的模型：拦截并提示
+  // （deepseek-chat / deepseek-reasoner 为纯文本模型，且官方将于 2026-07-24 弃用）
   const textOnly = [
+    "deepseek-chat",
+    "deepseek-reasoner",
     "reasoner",
     "embedding",
     "text-embedding",
@@ -67,8 +71,11 @@ function isVisionModel(model: string): boolean {
   return true;
 }
 
-const VISION_HINT =
-  "当前模型不支持图片输入。请到「设置」把模型换成支持视觉的模型（如 OpenAI gpt-4o、通义千问 qwen-vl、DeepSeek-VL 等），再发送图片。纯文本题目直接输入文字即可。";
+// 生成「当前模型不支持图片」的中文友好提示，动态带上模型名，避免笼统否定厂商。
+function visionHint(model?: string): string {
+  const name = model ? `「${model}」` : "";
+  return `当前模型${name}不支持图片输入（或该端点不接受图片）。请到「设置」把模型换成支持视觉的模型，例如 DeepSeek 的 deepseek-v4-flash / OpenAI gpt-4o / 通义千问 qwen-vl 等，再发送图片。纯文本题目直接输入文字即可。`;
+}
 
 // 纯客户端 fetch：浏览器内直接调用大模型（无服务端代理）。
 // 通过 useChat 的 fetch 选项拦截请求，改用 streamText 直连用户配置的模型，
@@ -91,7 +98,7 @@ async function clientChatFetch(
   if (messagesHaveImage(body.messages) && !isVisionModel(llm.model)) {
     return createDataStreamResponse({
       execute: () => {
-        throw new Error(VISION_HINT);
+        throw new Error(visionHint(llm.model));
       },
       onError: (error) => (error instanceof Error ? error.message : "未知错误"),
     });
@@ -111,7 +118,7 @@ async function clientChatFetch(
       const msg = error instanceof Error ? error.message : String(error);
       // 任何与图片 / 视觉 / 多模态相关的报错，都转成中文指引
       if (/image_url|unknown variant|image|vision|multimodal|图片/i.test(msg)) {
-        return VISION_HINT;
+        return visionHint(llm.model);
       }
       return error instanceof Error
         ? error.message

@@ -20,7 +20,7 @@ export const PROVIDER_PRESETS: Record<
   Exclude<ProviderId, "custom">,
   { label: string; baseURL: string; model: string }
 > = {
-  deepseek: { label: "DeepSeek", baseURL: "https://api.deepseek.com/v1", model: "deepseek-chat" },
+  deepseek: { label: "DeepSeek", baseURL: "https://api.deepseek.com/v1", model: "deepseek-v4-flash" },
   openai: { label: "OpenAI", baseURL: "https://api.openai.com/v1", model: "gpt-4o-mini" },
   anthropic: { label: "Claude (Anthropic)", baseURL: "https://api.anthropic.com/v1", model: "claude-3-5-sonnet-latest" },
   qwen: { label: "通义千问", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
