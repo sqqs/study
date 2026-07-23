@@ -11,8 +11,9 @@ import { useRegistry } from "./registry-store";
 // 纯客户端 fetch：浏览器内直接调用大模型（无服务端代理）。
 // 通过 useChat 的 fetch 选项拦截请求，改用 streamText 直连用户配置的模型，
 // 并返回数据流响应（useChat 原生消费）。Key 始终只存在于用户浏览器。
-async function clientChatFetch(_url: string, init: RequestInit) {
-  const body = JSON.parse(init.body as string) as { messages: any[] };
+async function clientChatFetch(_input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const raw = (init?.body as string | undefined) ?? "{}";
+  const body = JSON.parse(raw) as { messages: any[] };
   const { llm, profile } = useSettings.getState();
   const patterns = useRegistry.getState().patterns;
 
@@ -22,7 +23,7 @@ async function clientChatFetch(_url: string, init: RequestInit) {
     messages: convertToCoreMessages(body.messages),
     tools: { savePattern: savePatternTool },
     maxSteps: 6,
-    abortSignal: init.signal,
+    abortSignal: init?.signal ?? undefined,
   });
 
   return result.toDataStreamResponse({
