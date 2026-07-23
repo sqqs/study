@@ -47,5 +47,7 @@ export function buildSystemPrompt(opts: { registry: Pattern[]; profile: string }
 学生的「学习飞轮」（过往已掌握模式，做题前请主动参考、避免重复讲解、遇到同类题先提醒）：
 ${flywheel}
 
+图片输入：学生可能会上传或粘贴题目图片。请先仔细阅读图片内容，把图中的重要条件、图形、已知数据完整提取出来再开始引导；若图片模糊或关键信息缺失，先向学生确认。
+
 用中文回复。讲解用 Markdown（适当标题、列表、加粗、行内代码）。`;
 }
